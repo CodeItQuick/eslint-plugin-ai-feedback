@@ -1,0 +1,61 @@
+
+
+#@ F Enable snarzle bifurcation
+# \ \ \
+#  \ \ Commit Summary
+#   \ Change Type
+#    Risk Level
+#
+# .----------------------------------------.
+# | Risk-Aware Commit Notation Cheat Sheet |
+# '----------------------------------------'
+#
+# For details, see
+# https://github.com/RefactoringCombos/ArlosCommitNotation
+#
+# .---.-------------------.--------------------------------------.
+# |   | Risk Level        | Meaning                              |
+# |---|-------------------|--------------------------------------|
+# | . | (Proven) Safe     | Addresses all known & unknown risks  |
+# | ^ | Validated         | Addresses all known risks            |
+# | ! | Risky             | Some known risks remain unverified   |
+# | @ | (Probably) Broken | No risk attestation                  |
+# '---'-------------------'--------------------------------------'
+#
+# .---.---------------.------------------------------------------.
+# |   | Change Type   | Meaning                                  |
+# |---|---------------|------------------------------------------|
+# | F | Feature       | Change or extend one aspect of program   |
+# |   |               | behavior without altering others.        |
+# |---|---------------|------------------------------------------|
+# | B | Bugfix        | Repair one existing, undesirable program |
+# |   |               | behavior without altering any others.    |
+# |---|---------------|------------------------------------------|
+# | r | Refactoring   | Change implementation without changing   |
+# |   |               | program behavior.                        |
+# |---|---------------|------------------------------------------|
+# | d | Documentation | Change something which communicates to   |
+# |   |               | team members and does not impact         |
+# |   |               | program behavior.                        |
+# '---'---------------'------------------------------------------'
+#
+# Change type casing can have several meanings based on your preference.
+# Refer to the full docs for details.
+#
+# .---.---------------.------------------------------------------.
+# |   | Extension     | Meaning                                  |
+# |---|---------------|------------------------------------------|
+# | m | Merge         | Risk = max of any commit in the branch.  |
+# | t | Test-only     | Alter tests without altering behavior.   |
+# | e | Environment   | Tooling/config; no program behavior.     |
+# | a | Auto          | Formatting or code generation.           |
+# | c | Comment       | Comments only, not doc-tool visible.     |
+# | C | Content       | User-visible copy.                       |
+# | p | Process       | Team process or working agreement.       |
+# | s | Spec          | Spec or design documents.                |
+# | n | NOP           | Empty commit (--allow-empty).            |
+# | @ | Unknown       | Multiple/unvalidated. Usually "@ @".     |
+# '---'---------------'------------------------------------------'
+#
+# Features and bugfixes over 8 lines (tests included) cannot claim
+# a low-risk marker. Shrink the commit, not the claim.

@@ -1,0 +1,26 @@
+{
+  "name": "eslint-plugin-ai-feedback",
+  "version": "0.1.0",
+  "description": "ESLint rules that give an AI agent feedback that a skill used to give in prose.",
+  "type": "module",
+  "main": "index.js",
+  "exports": "./index.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "ai",
+    "testing"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": ">=9"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^8.74.0",
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3"
+  }
+}
