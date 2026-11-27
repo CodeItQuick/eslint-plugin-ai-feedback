@@ -10,7 +10,7 @@ RuleTester.it = it;
 RuleTester.itOnly = it.only;
 
 const tester = new RuleTester();
-const run = (name, cases) => tester.run(name, plugin.rules[name], cases);
+const run = (name, cases) => tester.run(name, plugin.rules[`writing-tests/${name}`], cases);
 
 run('no-control-flow-in-test', {
     valid: [

@@ -89,7 +89,7 @@ const configFor = info => [
     { files: ['**/*.{ts,tsx,mts,cts}'], languageOptions: { parser: tsParser } },
     plugin.configs[info ? 'writing-tests-info' : 'writing-tests'],
     // The plugin's default limit is 30. The validator's cases expect its limit of 20.
-    { files: plugin.configs['writing-tests'].files, rules: { 'ai-feedback/max-test-lines': ['warn', { max: 20 }] } },
+    { files: plugin.configs['writing-tests'].files, rules: { 'ai-feedback/writing-tests/max-test-lines': ['warn', { max: 20 }] } },
 ];
 
 /** The roots in the case's `.claude/writing-tests/config.json`, as the validator reads them with no path. */
@@ -114,7 +114,7 @@ async function lint(folder, flags, paths) {
     const results = await eslint.lintFiles(paths.length ? paths : defaultRoots(folder));
     const findings = results.flatMap(result => result.messages.map(message => {
         const file = relative(folder, result.filePath).replace(/\\/g, '/');
-        const rule = message.ruleId?.replace('ai-feedback/', '');
+        const rule = message.ruleId?.replace('ai-feedback/writing-tests/', '');
         const kind = KINDS[`${rule}/${message.messageId}`] ?? KINDS[rule] ?? `unmapped(${message.ruleId}: ${message.message})`;
         return BY_FILE.has(kind) ? `${kind} ${file}` : `${kind} ${file}:${message.line}`;
     })).sort();

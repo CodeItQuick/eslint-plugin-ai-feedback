@@ -22,6 +22,7 @@ For TypeScript test files, add the `typescript-eslint` parser for the same `file
 
 Ported from `~/.claude/skills/writing-tests/scripts/validate-tests.mjs`.
 A validator failure is an `error`. A validator warning is a `warn`.
+Each rule ID has the `writing-tests/` prefix, for example `ai-feedback/writing-tests/no-focused-test`.
 
 | Rule | Level | Catches |
 |------|-------|---------|
