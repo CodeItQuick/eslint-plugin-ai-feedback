@@ -1,7 +1,13 @@
 import { codeText, enclosingTest, isPlaywright } from '../lib/tests.js';
 
 /** A stubbed `fetch`, a module mock, msw or nock. */
-const CONTROLS_NETWORK = /stubGlobal\s*\(\s*['"]fetch|\b(?:sinon\.stub|jest\.spyOn)\s*\(\s*global(?:This)?\s*,\s*['"]fetch|\b(?:vi|jest)\.mock\s*\(|\bmsw\b|\bnock\b/;
+const NETWORK_CONTROLS = [
+    /stubGlobal\s*\(\s*['"]fetch/,
+    /\b(?:sinon\.stub|jest\.spyOn)\s*\(\s*global(?:This)?\s*,\s*['"]fetch/,
+    /\b(?:vi|jest)\.mock\s*\(/,
+    /\bmsw\b|\bnock\b/,
+];
+const controlsNetwork = text => NETWORK_CONTROLS.some(control => control.test(text));
 
 /** `fetch(`, `axios(`, `axios.get(`, `http.get(`, `https.request(`. */
 function isNetworkCallee(callee) {
@@ -11,7 +17,11 @@ function isNetworkCallee(callee) {
     return object === 'axios' || (['http', 'https'].includes(object) && ['get', 'request'].includes(callee.property.name));
 }
 
-const urlText = node => (node?.type === 'Literal' ? String(node.value) : node?.type === 'TemplateLiteral' ? node.quasis[0].value.cooked : '');
+function urlText(node) {
+    if (node?.type === 'Literal') return String(node.value);
+    if (node?.type === 'TemplateLiteral') return node.quasis[0].value.cooked;
+    return '';
+}
 
 export default {
     meta: {
@@ -23,7 +33,7 @@ export default {
         schema: [],
     },
     create(context) {
-        if (isPlaywright(context) || CONTROLS_NETWORK.test(codeText(context.sourceCode))) return {};
+        if (isPlaywright(context) || controlsNetwork(codeText(context.sourceCode))) return {};
         return {
             CallExpression(node) {
                 if (isNetworkCallee(node.callee) && /^https?:\/\//.test(urlText(node.arguments[0])) && enclosingTest(context, node)) {

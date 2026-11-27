@@ -104,7 +104,8 @@ export default {
                 for (const leak of [...LEAKS, MATH_RANDOM]) {
                     if (restored(leak)) continue;
                     for (const helper of calledHelpers.filter(candidate => leak.setup.test(candidate.body))) {
-                        const what = helper.body.match(leak.setup)[0].replace(/\s*\($/, '()');
+                        const setup = helper.body.match(leak.setup)[0];
+                        const what = setup.endsWith('(') ? `${setup.slice(0, -1).trimEnd()}()` : setup;
                         for (const call of calls.filter(candidate => candidate.callee.name === helper.local)) {
                             context.report({ node: call, messageId: 'helperLeak', data: { helper: helper.local, from: helper.from, what, needs: leak.needs } });
                         }

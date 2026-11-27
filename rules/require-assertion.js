@@ -1,7 +1,7 @@
 import { callbackOf, isTestCall } from '../lib/tests.js';
 
 /** `expect`, `assert`, `nodeAssert`, or a helper named for one, such as `expectSaved`. */
-const ASSERT_NAME = /^(?:expect|assert)\w*$|\w+Assert$/;
+const isAssertionName = name => /^(?:expect|assert)\w*$/.test(name) || /\wAssert$/.test(name);
 
 /** Each name in a callee chain: `sinon.assert.calledWith` gives calledWith, assert and sinon. */
 function calleeNames(callee) {
@@ -27,7 +27,7 @@ export default {
         };
         return {
             CallExpression(node) {
-                if (calleeNames(node.callee).some(name => ASSERT_NAME.test(name ?? ''))) markTests(node);
+                if (calleeNames(node.callee).some(name => isAssertionName(name ?? ''))) markTests(node);
             },
             'MemberExpression[property.name="should"]': markTests,
             'CallExpression:exit'(node) {
