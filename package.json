@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-ai-feedback",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ESLint rules that give an AI agent feedback that a skill used to give in prose.",
   "type": "module",
   "main": "index.js",
