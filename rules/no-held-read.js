@@ -37,8 +37,8 @@ export default {
                 // A read inside `expect(async () => …).toPass()` is retried.
                 const retried = context.sourceCode.getAncestors(node).some(ancestor => isExpectCall(ancestor) && isFunction(ancestor.arguments[0]) && ancestor.arguments[0].async);
                 // A read after an awaited expect runs on a page that the expect already waited for.
-                const waited = firstAwaitedExpect.get(test) < node.range[0];
-                if (!retried && !waited) held.push({ node, test, method, name: node.id.name });
+                const isWaited = firstAwaitedExpect.get(test) < node.range[0];
+                if (!retried && !isWaited) held.push({ node, test, method, name: node.id.name });
             },
             CallExpression(node) {
                 const subject = isExpectCall(node) && leftmostName(node.arguments[0]);

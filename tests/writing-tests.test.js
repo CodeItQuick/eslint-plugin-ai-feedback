@@ -3,7 +3,7 @@ import { RuleTester } from 'eslint';
 import { fileURLToPath } from 'node:url';
 import plugin from '../index.js';
 
-const fixture = path => fileURLToPath(new URL(`./fixtures/${path}`, import.meta.url));
+const fixture = path => fileURLToPath(new URL(`fixtures/${path}`, import.meta.url));
 
 RuleTester.describe = describe;
 RuleTester.it = it;

@@ -21,8 +21,8 @@ export default {
         return controlFlowVisitor((node, kind) => {
             if (enclosingTest(context, node)) return;
             const ancestors = context.sourceCode.getAncestors(node);
-            if (ancestors.some(isHelper)) return context.report({ node, messageId: 'helper', data: { kind } });
-            if (ancestors.some(isHookCallback) && !isRestoringDelete(node)) context.report({ node, messageId: 'hook', data: { kind } });
+            if (ancestors.some(ancestor => isHelper(ancestor))) return context.report({ node, messageId: 'helper', data: { kind } });
+            if (ancestors.some(ancestor => isHookCallback(ancestor)) && !isRestoringDelete(node)) context.report({ node, messageId: 'hook', data: { kind } });
         });
     },
 };

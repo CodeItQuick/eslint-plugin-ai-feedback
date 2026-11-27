@@ -17,9 +17,9 @@ function collapsingCall(node) {
 
 /** The name of the weak check in an expect chain, or null. */
 function weakExpect(node) {
+    if (node.arguments[0]?.type === 'UnaryExpression' && node.arguments[0].operator === 'typeof') return 'expect(typeof …)';
     const { names, args } = chainAfter(node);
     const last = names.at(-1);
-    if (node.arguments[0]?.type === 'UnaryExpression' && node.arguments[0].operator === 'typeof') return 'expect(typeof …)';
     if (names.includes('not') && ['toBeNull', 'toBeUndefined'].includes(last)) return `not.${last}()`;
     if (SIGN_ONLY.has(last) && args[0]?.type === 'Literal' && args[0].value === 0) return `${last}(0)`;
     return ALWAYS_WEAK.has(last) ? last : null;

@@ -6,12 +6,12 @@ const isText = node => node.type === 'TemplateLiteral' || (node.type === 'Litera
 
 /** `amount * 1.08`, `first.remaining - 10`: arithmetic with a name on one side. Not `-1`, and not string concatenation. */
 function hasArithmetic(expected) {
-    let found = false;
+    let isFound = false;
     walk(expected, node => {
         if (node.type !== 'BinaryExpression' || !ARITHMETIC.has(node.operator) || isText(node.left) || isText(node.right)) return;
-        walk(node, inner => { if (inner.type === 'Identifier') found = true; });
+        walk(node, inner => { if (inner.type === 'Identifier') isFound = true; });
     });
-    return found;
+    return isFound;
 }
 
 export default {
@@ -29,7 +29,7 @@ export default {
             CallExpression(node) {
                 const expected = expectedOf(node);
                 if (!expected || nameRead(expected) || !hasArithmetic(expected) || !enclosingTest(context, node)) return;
-                const expression = context.sourceCode.getText(expected).replace(/\s+/g, ' ');
+                const expression = context.sourceCode.getText(expected).replaceAll(/\s+/g, ' ');
                 context.report({ node: expected, messageId: 'computed', data: { expression } });
             },
         };

@@ -1,4 +1,4 @@
-import { relative } from 'node:path';
+import nodePath from 'node:path';
 import { definitionsOf, otherDefinitions } from '../lib/files.js';
 
 export default {
@@ -15,12 +15,12 @@ export default {
         return {
             'Program:exit'() {
                 const mine = definitionsOf(context.sourceCode.ast).filter(definition => definition.kind === 'function');
-                if (!mine.length) return;
+                if (mine.length === 0) return;
                 const others = otherDefinitions(context).filter(definition => definition.kind === 'function');
                 for (const { name, key, id } of mine) {
                     const drifted = others.filter(other => other.name === name && other.key !== key);
-                    if (!drifted.length) continue;
-                    const files = [...new Set(drifted.map(other => relative(context.cwd, other.path).replace(/\\/g, '/')))].join(', ');
+                    if (drifted.length === 0) continue;
+                    const files = [...new Set(drifted.map(other => nodePath.relative(context.cwd, other.path).replaceAll('\\', '/')))].join(', ');
                     context.report({ node: id, messageId: 'drifted', data: { name, files } });
                 }
             },

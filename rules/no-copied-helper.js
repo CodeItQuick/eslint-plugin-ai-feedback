@@ -1,4 +1,4 @@
-import { relative } from 'node:path';
+import nodePath from 'node:path';
 import { definitionsOf, otherDefinitions } from '../lib/files.js';
 
 export default {
@@ -15,11 +15,11 @@ export default {
         return {
             'Program:exit'() {
                 const mine = definitionsOf(context.sourceCode.ast);
-                if (!mine.length) return;
+                if (mine.length === 0) return;
                 const others = otherDefinitions(context);
                 for (const { name, key, id } of mine) {
                     const copy = others.find(other => other.key === key);
-                    if (copy) context.report({ node: id, messageId: 'copied', data: { name, other: copy.name, file: relative(context.cwd, copy.path).replace(/\\/g, '/') } });
+                    if (copy) context.report({ node: id, messageId: 'copied', data: { name, other: copy.name, file: nodePath.relative(context.cwd, copy.path).replaceAll('\\', '/') } });
                 }
             },
         };

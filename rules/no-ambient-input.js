@@ -1,4 +1,4 @@
-import { codeText, controlsClock, controlsRandom, placeOf } from '../lib/tests.js';
+import { codeText, hasFakeClock, hasFakeRandom, placeOf } from '../lib/tests.js';
 
 const WHERE = { test: 'inside a test body', helper: 'in a test-file helper or hook' };
 
@@ -17,8 +17,8 @@ const ambientRule = place => ({
     },
     create(context) {
         const code = codeText(context.sourceCode);
-        const clock = controlsClock(code);
-        const random = controlsRandom(code);
+        const clock = hasFakeClock(code);
+        const random = hasFakeRandom(code);
         const report = (node, messageId, what) => {
             if (placeOf(context, node) === place) context.report({ node, messageId, data: { what } });
         };

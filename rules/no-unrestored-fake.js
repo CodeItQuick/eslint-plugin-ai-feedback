@@ -9,10 +9,10 @@ const LEAKS = [
     { objects: ['sinon'], methods: ['stub', 'spy', 'replace'], restore: /\.restore\s*\(/, needs: 'restore() or sinon.restore()' },
     { objects: ['vi'], methods: ['stubGlobal'], restore: /\bvi\.unstubAllGlobals\s*\(/, needs: 'unstubAllGlobals()' },
     { objects: ['vi'], methods: ['stubEnv'], restore: /\bvi\.unstubAllEnvs\s*\(/, needs: 'unstubAllEnvs()' },
-].map(leak => ({ ...leak, setup: new RegExp(`\\b(?:${leak.objects.join('|')})\\.(?:${leak.methods.join('|')})\\s*\\(`) }));
+].map(leak => ({ ...leak, setup: new RegExp(String.raw`\b(?:${leak.objects.join('|')})\.(?:${leak.methods.join('|')})\s*\(`) }));
 const MATH_RANDOM = { restore: /\bMath\.random\s*=(?!=)/, needs: 'Math.random = original', setup: /\bMath\.random\s*=(?!=)/ };
 
-const callOf = name => new RegExp(`(?<![.\\w$])${name}\\s*\\(`);
+const callOf = name => new RegExp(String.raw`(?<![.\w$])${name}\s*\(`);
 
 /** Each exported function of a support module, by name: its text and the text of each after-hook inside it. */
 function exportedHelpers({ text, ast }) {
@@ -25,7 +25,8 @@ function exportedHelpers({ text, ast }) {
     for (const statement of ast.body) {
         const declaration = statement.type === 'ExportNamedDeclaration' ? statement.declaration : null;
         if (declaration?.type === 'FunctionDeclaration') add(declaration.id.name, declaration);
-        for (const declarator of declaration?.type === 'VariableDeclaration' ? declaration.declarations : []) {
+        const declarators = declaration?.type === 'VariableDeclaration' ? declaration.declarations : [];
+        for (const declarator of declarators) {
             if (declarator.id.type === 'Identifier' && isFunction(declarator.init)) add(declarator.id.name, declarator.init);
         }
     }
@@ -50,6 +51,15 @@ export default {
         const hooks = [];
         const hookArguments = [];
         const calls = [];
+        /** Reports each call of `helper` when the helper sets up `leak`. */
+        const reportHelperLeak = (leak, helper) => {
+            if (!leak.setup.test(helper.body)) return;
+            const setup = helper.body.match(leak.setup)[0];
+            const what = setup.endsWith('(') ? `${setup.slice(0, -1).trimEnd()}()` : setup;
+            for (const call of calls) {
+                if (call.callee.name === helper.local) context.report({ node: call, messageId: 'helperLeak', data: { helper: helper.local, from: helper.from, what, needs: leak.needs } });
+            }
+        };
         /** Helpers imported by name from a relative path: `import { x } from './support/x'` or `const { x } = await import(…)`. */
         const imported = [];
         const importHelpers = (specifier, bindings) => {
@@ -96,20 +106,13 @@ export default {
                     ...imported.filter(helper => hookArguments.includes(helper.local) || hooks.some(hook => callOf(helper.local).test(hook))).map(helper => helper.body),
                     ...calledHelpers.flatMap(helper => helper.hooks),
                 ];
-                const restored = leak => restorers.some(text => leak.restore.test(text));
+                const isRestored = leak => restorers.some(text => leak.restore.test(text));
 
                 for (const { node, leak, what } of setups) {
-                    if (!restored(leak)) context.report({ node, messageId: 'leak', data: { what, needs: leak.needs } });
+                    if (!isRestored(leak)) context.report({ node, messageId: 'leak', data: { what, needs: leak.needs } });
                 }
                 for (const leak of [...LEAKS, MATH_RANDOM]) {
-                    if (restored(leak)) continue;
-                    for (const helper of calledHelpers.filter(candidate => leak.setup.test(candidate.body))) {
-                        const setup = helper.body.match(leak.setup)[0];
-                        const what = setup.endsWith('(') ? `${setup.slice(0, -1).trimEnd()}()` : setup;
-                        for (const call of calls.filter(candidate => candidate.callee.name === helper.local)) {
-                            context.report({ node: call, messageId: 'helperLeak', data: { helper: helper.local, from: helper.from, what, needs: leak.needs } });
-                        }
-                    }
+                    if (!isRestored(leak)) for (const helper of calledHelpers) reportHelperLeak(leak, helper);
                 }
             },
         };

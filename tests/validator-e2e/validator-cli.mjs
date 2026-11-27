@@ -14,7 +14,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { homedir, tmpdir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import nodePath from 'node:path';
 import { ESLint } from 'eslint';
 import tsParser from '@typescript-eslint/parser';
 import plugin from '../../index.js';
@@ -77,10 +77,10 @@ const BY_FILE = new Set(['copied', 'sameName']);
 function expectedFindings(findings) {
     return Object.entries(findings).flatMap(([kind, entries]) => entries.flatMap(entry => {
         if (kind === 'twice') return entry.replace(/^same test body at /, '').split(', ').slice(1).map(place => `${kind} ${place}`);
-        if (BY_FILE.has(kind)) return entry.split(' — ')[1].split(', ').map(file => `${kind} ${file}`);
+        if (BY_FILE.has(kind)) return entry.split(' — ', 2)[1].split(', ').map(file => `${kind} ${file}`);
         const [, file, line] = entry.match(/^(\S+?):(\d+): /);
-        return [`${kind} ${file}:${line}`];
-    })).sort();
+        return `${kind} ${file}:${line}`;
+    })).toSorted((a, b) => a.localeCompare(b));
 }
 
 const configFor = info => [
@@ -94,30 +94,30 @@ const configFor = info => [
 
 /** The roots in the case's `.claude/writing-tests/config.json`, as the validator reads them with no path. */
 function defaultRoots(folder) {
-    const config = join(folder, '.claude', 'writing-tests', 'config.json');
+    const config = nodePath.join(folder, '.claude', 'writing-tests', 'config.json');
     return statSync(config, { throwIfNoEntry: false }) ? JSON.parse(readFileSync(config, 'utf8')).roots : ['.'];
 }
 
 /** Writes `files` into a fresh folder, which the test context removes afterwards. */
 function folderWith(context, files) {
-    const folder = mkdtempSync(join(tmpdir(), 'ai-feedback-'));
+    const folder = mkdtempSync(nodePath.join(tmpdir(), 'ai-feedback-'));
     context.after(() => rmSync(folder, { recursive: true }));
-    Object.entries(files).forEach(([name, source]) => {
-        mkdirSync(dirname(join(folder, name)), { recursive: true });
-        writeFileSync(join(folder, name), source);
-    });
+    for (const [name, source] of Object.entries(files)) {
+        mkdirSync(nodePath.dirname(nodePath.join(folder, name)), { recursive: true });
+        writeFileSync(nodePath.join(folder, name), source);
+    }
     return folder;
 }
 
 async function lint(folder, flags, paths) {
     const eslint = new ESLint({ cwd: folder, overrideConfigFile: true, overrideConfig: configFor(flags.includes('--info')), errorOnUnmatchedPattern: false });
-    const results = await eslint.lintFiles(paths.length ? paths : defaultRoots(folder));
+    const results = await eslint.lintFiles(paths.length > 0 ? paths : defaultRoots(folder));
     const findings = results.flatMap(result => result.messages.map(message => {
-        const file = relative(folder, result.filePath).replace(/\\/g, '/');
+        const file = nodePath.relative(folder, result.filePath).replaceAll('\\', '/');
         const rule = message.ruleId?.replace('ai-feedback/writing-tests/', '');
         const kind = KINDS[`${rule}/${message.messageId}`] ?? KINDS[rule] ?? `unmapped(${message.ruleId}: ${message.message})`;
         return BY_FILE.has(kind) ? `${kind} ${file}` : `${kind} ${file}:${message.line}`;
-    })).sort();
+    })).toSorted((a, b) => a.localeCompare(b));
     return { status: results.some(result => result.errorCount > 0) ? 1 : 0, findings };
 }
 
@@ -127,7 +127,7 @@ export function check(title, files, expected, flags = [], paths = ['.']) {
 }
 
 /** The installed validator, which the differential cases run beside the plugin. */
-const VALIDATOR = join(homedir(), '.claude', 'skills', 'writing-tests', 'scripts', 'validate-tests.mjs');
+const VALIDATOR = nodePath.join(homedir(), '.claude', 'skills', 'writing-tests', 'scripts', 'validate-tests.mjs');
 
 /** Each report heading of the validator, by its kind of finding. */
 const HEADINGS = new Map([

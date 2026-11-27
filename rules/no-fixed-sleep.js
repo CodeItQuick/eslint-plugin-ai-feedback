@@ -1,4 +1,4 @@
-import { codeText, controlsClock, placeOf } from '../lib/tests.js';
+import { codeText, hasFakeClock, placeOf } from '../lib/tests.js';
 
 const WHERE = { test: 'inside a test body', helper: 'in a test-file helper or hook' };
 
@@ -14,7 +14,7 @@ const sleepRule = place => ({
         schema: [],
     },
     create(context) {
-        const clock = controlsClock(codeText(context.sourceCode));
+        const clock = hasFakeClock(codeText(context.sourceCode));
         const report = (node, what) => {
             if (placeOf(context, node) === place) context.report({ node, messageId: 'sleep', data: { what } });
         };

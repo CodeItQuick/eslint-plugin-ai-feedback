@@ -6,7 +6,7 @@ import noControlFlowInHelper from './rules/no-control-flow-in-helper.js';
 import noControlFlowInTest from './rules/no-control-flow-in-test.js';
 import noCopiedHelper from './rules/no-copied-helper.js';
 import noDuplicateTestBody from './rules/no-duplicate-test-body.js';
-import noEnvInTest from './rules/no-env-in-test.js';
+import noEnvironmentInTest from './rules/no-env-in-test.js';
 import noFixedSleep, { inHelper as noFixedSleepInHelper } from './rules/no-fixed-sleep.js';
 import noFocusedTest from './rules/no-focused-test.js';
 import noFoldedComparison from './rules/no-folded-comparison.js';
@@ -36,7 +36,7 @@ const plugin = {
         'writing-tests/no-control-flow-in-test': noControlFlowInTest,
         'writing-tests/no-copied-helper': noCopiedHelper,
         'writing-tests/no-duplicate-test-body': noDuplicateTestBody,
-        'writing-tests/no-env-in-test': noEnvInTest,
+        'writing-tests/no-env-in-test': noEnvironmentInTest,
         'writing-tests/no-fixed-sleep': noFixedSleep,
         'writing-tests/no-fixed-sleep-in-helper': noFixedSleepInHelper,
         'writing-tests/no-focused-test': noFocusedTest,

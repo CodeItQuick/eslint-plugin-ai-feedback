@@ -14,8 +14,7 @@ export default {
                     for (const variable of scope.variables) {
                         const definition = variable.defs[0];
                         // A `for (let i = 0; …; i++)` counter is loop state, which no-control-flow-in-test reports.
-                        if (definition?.type !== 'Variable' || definition.parent.kind !== 'let' || definition.parent.parent.type === 'ForStatement') continue;
-                        if (!enclosingTest(context, definition.name)) continue;
+                        if (definition?.type !== 'Variable' || definition.parent.kind !== 'let' || definition.parent.parent.type === 'ForStatement' || !enclosingTest(context, definition.name)) continue;
                         if (variable.references.some(reference => reference.isWrite() && !reference.init)) {
                             context.report({ node: definition.name, messageId: 'reassigned', data: { name: variable.name } });
                         }

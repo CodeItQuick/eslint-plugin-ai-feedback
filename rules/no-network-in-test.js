@@ -7,7 +7,7 @@ const NETWORK_CONTROLS = [
     /\b(?:vi|jest)\.mock\s*\(/,
     /\bmsw\b|\bnock\b/,
 ];
-const controlsNetwork = text => NETWORK_CONTROLS.some(control => control.test(text));
+const hasNetworkStub = text => NETWORK_CONTROLS.some(control => control.test(text));
 
 /** `fetch(`, `axios(`, `axios.get(`, `http.get(`, `https.request(`. */
 function isNetworkCallee(callee) {
@@ -33,7 +33,7 @@ export default {
         schema: [],
     },
     create(context) {
-        if (isPlaywright(context) || controlsNetwork(codeText(context.sourceCode))) return {};
+        if (isPlaywright(context) || hasNetworkStub(codeText(context.sourceCode))) return {};
         return {
             CallExpression(node) {
                 if (isNetworkCallee(node.callee) && /^https?:\/\//.test(urlText(node.arguments[0])) && enclosingTest(context, node)) {

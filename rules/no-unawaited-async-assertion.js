@@ -19,13 +19,13 @@ export default {
             CallExpression(node) {
                 if (!isExpectCall(node)) return;
                 const { names, top } = chainAfter(node);
-                const poll = node.callee.property?.name === 'poll';
-                const async = poll || names.includes('resolves') || names.includes('rejects') || (playwright && WEB_FIRST.has(names.at(-1)));
+                const isPoll = node.callee.property?.name === 'poll';
+                const async = isPoll || names.includes('resolves') || names.includes('rejects') || (playwright && WEB_FIRST.has(names.at(-1)));
                 if (!async || !enclosingTest(context, node)) return;
                 const { parent } = top;
-                const awaited = parent.type === 'AwaitExpression' || parent.type === 'ReturnStatement'
+                const isAwaited = parent.type === 'AwaitExpression' || parent.type === 'ReturnStatement'
                     || (parent.type === 'ArrowFunctionExpression' && parent.body === top);
-                if (!awaited) context.report({ node: top, messageId: 'unawaited' });
+                if (!isAwaited) context.report({ node: top, messageId: 'unawaited' });
             },
         };
     },
